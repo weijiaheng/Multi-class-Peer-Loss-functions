@@ -13,15 +13,16 @@ This repository is the (Multi-Class & Deep Learning) Pytorch implementation of "
 
 ## Utilities
 This repository includes:
+
 📋 Multi-class implementation of Peer Loss functions;
 
 📋 Peer Loss functions in Deep Learning;
 
 📋 Dynamical tunning strategies of Peer Loss functions to further improve the performance.
 
-Details of running ($\alpha-$weighted) Peer Loss functions on MNIST, Fashion MNIST, CIFAR-10, CIFAR-100 with different noise setting are mentioned in the `README.md` file in each folder.
+Details of running (![equation](https://latex.codecogs.com/png.latex?%5Calpha-)weighted) Peer Loss functions on MNIST, Fashion MNIST, CIFAR-10, CIFAR-100 with different noise setting are mentioned in the `README.md` file in each folder.
 
-The workflow of $\alpha-$ weighted Peer Loss functions comes to:
+The workflow of ![equation](https://latex.codecogs.com/png.latex?%5Calpha-)weighted Peer Loss functions comes to:
 
 ![Figure1](peernet.png)
 
