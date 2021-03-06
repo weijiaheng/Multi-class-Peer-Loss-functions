@@ -10,7 +10,7 @@
 ## Training -- Fashion-MNIST
 We give 6 noise Fashion dataset as mentioned in our paper. To run the experiment without bias correction:
 ```
-python3 runner.py --r noise --s seed --batchsize 128
+python3 runner.py --r noise --batchsize 128
 ```
 
 
