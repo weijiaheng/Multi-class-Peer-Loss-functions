@@ -26,6 +26,13 @@ The workflow of ![equation](https://latex.codecogs.com/png.latex?%5Calpha-)weigh
 
 ![Figure1](peernet.png)
 
+
+## Decision boundary visualization
+Given a 2D syntheric dataset, the decision boundaries returned by training with Cross-entropy loss become loose when the noise rate is high. However, the decision boundaries w.r.t. Peer Loss functions remain tight despite high presence of label noise.
+
+![Figure2](decision_boundary.png)
+
+
 ## Citation
 
 If you use our code, please cite the following paper:
