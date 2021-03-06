@@ -19,11 +19,11 @@ from torch.nn import init
 from torch.autograd import Variable
 torch.autograd.set_detect_anomaly(True)
 num_classes = 10
-num_epochs = 20
+num_epochs = 300
 CUDA = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if CUDA else torch.FloatTensor
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 
 CE = nn.CrossEntropyLoss().to(device)
@@ -49,7 +49,7 @@ criterion.to(device)
 
 
 # Training
-def train(train_loader, peer_loader, model, optimizer, epoch, alpha):
+def train(train_loader, peer_loader, model, optimizer, epoch):
 
     model.train()
     for i, (idx, input, target) in enumerate(train_loader):
@@ -63,10 +63,12 @@ def train(train_loader, peer_loader, model, optimizer, epoch, alpha):
         # Prepare mixmatched images and labels for the Peer Term
         peer_iter = iter(peer_loader)
         input1 = peer_iter.next()[1]
-        output1 = model(input1)
+        output1 = model(input1.to(device))
         target2 = peer_iter.next()[2]
+        target2 = torch.Tensor(target2.float())
+        target2 = torch.autograd.Variable(target2.to(device))
         # Peer Loss with Cross-Entropy loss: L(f(x), y) - L(f(x1), y2)
-        loss = criterion(output, target) - alpha[epoch] * criterion(output1, target2)
+        loss = criterion(output, target.long()) - f_alpha(epoch) * criterion(output1, target2.long())
         loss.to(device)
         loss.backward()
         optimizer.step()
@@ -91,12 +93,40 @@ def test(model, test_loader):
     return accuracy
 
 
-def main(writer, a_list):
+# The weight of peer term
+def f_alpha(epoch):
+    # We provide two tuning strategies
+    # Setting 1
+    alpha1 = np.linspace(0.0, 0.0, num=120)
+    alpha2 = np.linspace(0.0, 1, num=180)
+ 
+    alpha = np.concatenate((alpha1, alpha2),axis=0)
+    
+    # Setting 2
+#    alpha1 = np.linspace(0.0, 0.0, num=120)
+#    alpha2 = np.linspace(0.0, 0.18, num=40)
+#    alpha3 = np.linspace(0.18, 0.32, num=100)
+#    alpha4 = np.linspace(0.32, 0.4, num=40)
+#
+#    alpha = np.concatenate((alpha1, alpha2, alpha3, alpha4),axis=0)
+    return alpha[epoch]
+   
+# Adjust learning rate and for ADAM Optimizer
+def adjust_learning_rate(optimizer, epoch, lr_plan):
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr_plan[epoch]/(1+f_alpha(epoch))
+        
+        
+def main(writer):
     model_PL = CNNModel().to(device)
     best_val_acc = 0
     train_acc_result = []
     val_acc_noisy_result = []
     test_acc_result = []
+    # Hyper-parameters: learning rate and the weight of peer term \alpha
+    lr_list = [1e-4] * 300
+    
+    
     # Dataloader for peer samples, which is used for the estimation of the marginal distribution
     peer_train = peer_data_train(batch_size=args.batchsize, img_size=(28, 28))
     peer_val = peer_data_val(batch_size=args.batchsize, img_size=(28, 28))
@@ -104,12 +134,13 @@ def main(writer, a_list):
     # Below we provide two learning rate settings which are used for all experiments in MNIST
     for epoch in range(num_epochs):
         print("epoch=", epoch,'r=', args.r)
-        # Setting 1
         learning_rate = 1e-4
         
         # We adopted the ADAM optimizer
         optimizer_PL = torch.optim.Adam(model_PL.parameters(), lr=learning_rate)
-        train(train_loader=train_loader_noisy, peer_loader = peer_train, model=model_PL, optimizer=optimizer_PL, epoch=epoch, alpha = a_list)
+        # asjust the learning rate
+        adjust_learning_rate(optimizer_PL, epoch, lr_list)
+        train(train_loader=train_loader_noisy, peer_loader = peer_train, model=model_PL, optimizer=optimizer_PL, epoch=epoch)
         print("validating model_PL...")
         
         # Training acc is calculated via noisy training data
@@ -150,19 +181,7 @@ if __name__ == '__main__':
     writer1 = csv.writer(open(f'result_{r}.csv','w'))
     writer1.writerow(['Epoch', 'Training Acc', 'Val_Noisy_Acc', 'Test_ACC'])
     os.makedirs("./trained_models/", exist_ok=True)
-    
-    # alpha list for the peer term
-    alpha_threshold = [0.0, 0.0, 1.0, 2.0, 5.0, 10.0, 20.0]
-    milestone = [0, 20, 40, 50, 100, 200, 300]
-    alpha_list = []
-    for i in range(len(milestone) - 1):
-        count = milestone[i]
-        a_ratio = (alpha_threshold[i + 1] - alpha_threshold[i]) / (milestone[i + 1] - milestone[i])
-        while count < milestone[i + 1]:
-            a = alpha_threshold[i] + (count - milestone[i] + 1) * a_ratio
-            alpha_list.append(a)
-            count += 1
             
-    main(writer1, alpha_list)
+    main(writer1)
     evaluate('./trained_models/' + str(args.r) + '_' + str(args.s))
     print("Traning finished")

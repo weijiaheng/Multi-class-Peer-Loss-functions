@@ -3,14 +3,14 @@
 ## Required Packages & Environment
 **Supported OS:** Windows, Linux, Mac OS X; Python: 3.6/3.7; 
 **Deep Learning Library:** PyTorch (GPU required)
-**Required Packages:** Numpy, Pandas, random, matplotlib, tqdm, csv, torch (also need Keras, Scikit-learn if use bias correction).
+**Required Packages:** Numpy, Pandas, random, matplotlib, tqdm, csv, torch.
 
 
 
 ## Training -- MNIST
 We give 6 noise MNIST dataset as mentioned in our paper. To run the experiment without bias correction:
 ```
-python3 runner.py --r noise --s seed --batchsize 128
+python3 runner.py --r noise --batchsize 128
 ```
 
 
