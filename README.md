@@ -52,4 +52,8 @@ If you use our code, please cite the following paper:
 📋 Peer Loss functions and its experiments on UCI datasets is available at:
 **https://github.com/gohsyi/PeerLoss**
 
+📋 The following work extends Peer Loss functions to a family of divergence-type robust loss functions and is available at:
+**https://github.com/weijiaheng/Robust-f-divergence-measures**
+The corresponding paper is "[When Optimizing f-Divergence is Robust with Label noise](https://arxiv.org/abs/2011.03687)" accepted by ICLR2021. 
+
 ## Thanks for watching!
