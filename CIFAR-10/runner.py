@@ -23,7 +23,7 @@ CUDA = True if torch.cuda.is_available() else False
 
 Tensor = torch.cuda.FloatTensor if CUDA else torch.FloatTensor
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
 
 opt = parser.parse_args()
@@ -92,13 +92,23 @@ def test(model, test_loader):
 
 # The weight of peer term
 def f_alpha(epoch):
-    alpha1 = np.linspace(0.0, 0.0, num=20)
-    alpha2 = np.linspace(0.0, 1, num=20)
-    alpha3 = np.linspace(1, 2, num=10)
-    alpha4 = np.linspace(2, 5, num=50)
-    alpha5 = np.linspace(5, 10, num=100)
-    alpha6 = np.linspace(10, 20, num=100)
- 
+    if args.r == 0.1 or args.r == 0.2:
+    # Sparse setting
+        alpha1 = np.linspace(0.0, 0.0, num=20)
+        alpha2 = np.linspace(0.0, 1, num=20)
+        alpha3 = np.linspace(1, 2, num=50)
+        alpha4 = np.linspace(2, 5, num=50)
+        alpha5 = np.linspace(5, 10, num=100)
+        alpha6 = np.linspace(10, 20, num=100)
+    else:
+    # Uniform/Random noise setting
+        alpha1 = np.linspace(0.0, 0.0, num=20)
+        alpha2 = np.linspace(0.0, 0.1, num=20)
+        alpha3 = np.linspace(1, 2, num=50)
+        alpha4 = np.linspace(2, 2.5, num=50)
+        alpha5 = np.linspace(2.5, 3.3, num=100)
+        alpha6 = np.linspace(3.3, 5, num=100)
+     
     alpha = np.concatenate((alpha1, alpha2, alpha3, alpha4, alpha5, alpha6),axis=0)
     return alpha[epoch]
    
