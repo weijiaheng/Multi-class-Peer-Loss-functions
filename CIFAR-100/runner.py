@@ -94,25 +94,10 @@ def test(model, test_loader):
 
     return accuracy
 
-    
-    # alpha list for the peer term
-    if args.r == 0.1 or args.r == 0.2:
-        alpha_threshold = [0.0, 0.0, 2.0, 10.0, 20.0]
-        milestone = [0, 10, 30, 100, 150]
-        alpha_list = []
-        for i in range(len(milestone) - 1):
-            count = milestone[i]
-            a_ratio = (alpha_threshold[i + 1] - alpha_threshold[i]) / (milestone[i + 1] - milestone[i])
-            while count < milestone[i + 1]:
-                a = alpha_threshold[i] + (count - milestone[i] + 1) * a_ratio
-                alpha_list.append(a)
-                count += 1
-    else:
-         alpha_list = [0.95 for i in range(150)]
-
 # The weight of peer term
 def f_alpha(epoch):
     if args.r == 0.1 or args.r == 0.2:
+    # Sparse setting
         alpha1 = np.linspace(0.0, 0.0, num=110)
         alpha2 = np.linspace(0.0, 2, num=20)
         alpha3 = np.linspace(2, 10, num=70)
@@ -120,6 +105,7 @@ def f_alpha(epoch):
      
         alpha = np.concatenate((alpha1, alpha2, alpha3, alpha4),axis=0)
     else:
+    # Uniform/Random noise setting
         alpha1 = np.linspace(0.0, 0.0, num=100)
         alpha2 = np.linspace(0.95, 0.95, num=150)
      
